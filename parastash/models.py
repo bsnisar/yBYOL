@@ -130,7 +130,7 @@ class BYOL:
 
         self._current_net = self._online_network
 
-    def train(self, loader: DataLoader, epochs, log_interval=100, return_embedding=False):
+    def train(self, loader: DataLoader, epochs, log_interval=80, return_embedding=False):
         step = 0
         total_steps = epochs * len(loader)
         pbar = progressbar(total_steps)
@@ -143,13 +143,15 @@ class BYOL:
 
         scaler = amp.GradScaler()
         for epoch in range(epochs):
-            for (image_one, image_two), _ in loader:
+            for (left, right), _ in loader:
+                image_one = left.to(self.device)
+                image_two = right.to(self.device)
+
                 with amp.autocast():
                     loss = self._loss(image_one, image_two)
 
                 if step % log_interval == 0:
-                    logger.info(f"step #{step}: loss={loss}")
-                    print('{"metric": "loss", "value": %s}' % loss)
+                    pbar.show(step, loss)
 
                 self._optimizer.zero_grad()
                 scaler.scale(loss).backward()
@@ -159,7 +161,6 @@ class BYOL:
                 self._update_target_network(step, total_steps)
 
                 step += 1
-                pbar.update(step)
 
     def _loss(self, image_one, image_two) -> torch.Tensor:
         # BYOL contains two identical Encoder networks.
@@ -253,22 +254,13 @@ class progressbar(object):
 
     def __init__(self, steps, prefix="", size=60, file=sys.stdout):
         self.prefix = prefix
-        self.size = size
-        self.count = steps
+        self.bar_size = size
+        self.steps = steps
         self.prev_call = None
         self.log = file
-        self.update(0)
+        self.show(0)
 
-    def update(self, step):
-        dur = None
-        if self.prev_call:
-            dur = self.prev_call - datetime.now()
-
-        self.prev_call = datetime.now()
-
-        self._show(step, dur=dur)
-
-    def _show(self, j, dur: typing.Optional[timedelta]):
-        x = int(self.size * j / self.count)
-        msg = "%s[%s%s] %i/%i [%s it/s]" % (self.prefix, "#" * x, "." * (self.size - x), j, self.count, dur or '?')
-        logger.info(msg)
+    def show(self, j, loss=None):
+        x = int(self.bar_size * j / self.steps)
+        logger.info("%s[%s%s] %i/%i - %s" % (self.prefix, "#" * x, "." * (self.bar_size - x), j, self.steps,
+                                             loss if loss else "?"))
