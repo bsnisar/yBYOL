@@ -11,7 +11,7 @@ import torch
 from torch import nn
 from torch.cuda import amp
 from torch.utils.data import DataLoader
-from parastash.model import ExternalModel
+from parastash.models_hub import ExternalModel
 
 logger = logging.getLogger(__name__)
 

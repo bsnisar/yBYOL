@@ -1,7 +1,7 @@
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
 
-from parastash.model.transforms import pil_can_open, load_image
+from parastash.transforms import pil_can_open, load_image
 
 
 class Dataset(ImageFolder):

@@ -5,7 +5,6 @@ from torchvision.transforms.functional import pad
 
 import io
 import PIL
-import abc
 
 from typing import Union
 
