@@ -49,16 +49,9 @@ def _extract_tarball(tar_path: str, extract_root: str, remove=False):
 
 class TarDataset(Dataset):
 
-    def __init__(self, tar_directory, transformations=None, remove_tarballs=False):
-        self.tar_directory = tar_directory
+    def __init__(self, tar_file, transformations=None, remove_tarballs=False):
         self.extracted_directory = tempfile.mkdtemp()
-
-        tarballs = [f for f in os.listdir(self.tar_directory) if f.endswith((".tar", ".tar.gz"))]
-        tar_paths = [os.path.join(self.tar_directory, tar) for tar in tarballs]
-        num_workers = os.cpu_count()
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            executor.map(lambda t: _extract_tarball(t, self.extracted_directory, remove_tarballs), tar_paths)
-
+        _extract_tarball(tar_file, self.extracted_directory, remove_tarballs)
         super().__init__(self.extracted_directory, transformations)
 
     def __del__(self):
