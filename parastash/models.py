@@ -15,6 +15,7 @@ from parastash.models_hub import ExternalModel
 
 logger = logging.getLogger(__name__)
 
+
 def _flatten(t):
     return t.reshape(t.shape[0], -1)
 
@@ -133,7 +134,7 @@ class BYOL:
     def train(self, loader: DataLoader, epochs, log_interval=80, return_embedding=False):
         step = 0
         total_steps = epochs * len(loader)
-        pbar = progressbar(total_steps)
+        pbar = progressbar(total_steps, log_iter=log_interval)
         logger.info(
             f"prepare the loop: device={self.device}, batches={len(loader)}, epochs={epochs}, steps={total_steps}")
 
@@ -151,9 +152,10 @@ class BYOL:
                     loss = self._loss(image_one, image_two)
 
                 if step % log_interval == 0:
-                    pbar.show(step, loss)
+                    pbar.print_next(loss=loss.item())
 
                 self._optimizer.zero_grad()
+
                 scaler.scale(loss).backward()
                 scaler.step(self._optimizer)
                 scaler.update()
@@ -252,15 +254,22 @@ class BYOL:
 # noinspection PyPep8Naming
 class progressbar(object):
 
-    def __init__(self, steps, prefix="", size=60, file=sys.stdout):
-        self.prefix = prefix
+    def __init__(self, steps,  size=40, log_iter=80):
         self.bar_size = size
         self.steps = steps
-        self.prev_call = None
-        self.log = file
-        self.show(0)
+        self.step = 0
+        self._last = None
+        self.log_iter = log_iter
 
-    def show(self, j, loss=None):
+    def print_next(self, loss=None):
+        j = self.step + 1
+        self.step = j
         x = int(self.bar_size * j / self.steps)
-        logger.info("%s[%s%s] %i/%i - %s" % (self.prefix, "#" * x, "." * (self.bar_size - x), j, self.steps,
-                                             loss if loss else "?"))
+        dur = None
+        if self._last:
+            dur = self._last - datetime.now()
+        self._last = datetime.now()
+
+        if j % self.log_iter == 0:
+            logger.info("%i/%i [%s%s] - %s/s - loss=%s" % (j, self.steps, "#" * x, "." * (self.bar_size - x),
+                                                           dur or "?", loss or "?"))
