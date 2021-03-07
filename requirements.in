@@ -2,6 +2,7 @@ nmslib
 h5py~=2.10.0
 numpy~=1.19.2
 pandas~=1.1.0
+imgaug<0.2.7
 pytorch-metric-learning
 scipy
 torch
