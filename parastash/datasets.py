@@ -39,6 +39,14 @@ class FolderDataset(Dataset):
         super().__init__(storage_dir, transformations)
 
 
+def _extract_tarball(tar_path: str, extract_root: str, remove=False):
+    logger.info(f"[TarDataset] extract {tar_path} into {tar_path}...")
+    with tarfile.open(tar_path) as my_tar:
+        my_tar.extractall(extract_root)  # specify which folder to extract to
+    if remove:
+        os.remove(tar_path)
+
+
 class TarDataset(Dataset):
 
     def __init__(self, tar_directory, transformations=None, remove_tarballs=False):
@@ -49,17 +57,9 @@ class TarDataset(Dataset):
         tar_paths = [os.path.join(self.tar_directory, tar) for tar in tarballs]
         num_workers = os.cpu_count()
         with ThreadPoolExecutor(max_workers=num_workers) as executor:
-            executor.map(lambda t: TarDataset.extract_tarball(t, self.extracted_directory, remove_tarballs), tar_paths)
+            executor.map(lambda t: _extract_tarball(t, self.extracted_directory, remove_tarballs), tar_paths)
 
         super().__init__(self.extracted_directory, transformations)
-
-    @staticmethod
-    def extract_tarball(tar_path: str, extract_root: str, remove=False):
-        logger.info(f"[TarDataset] extract {tar_path} into {tar_path}...")
-        with tarfile.open(tar_path) as my_tar:
-            my_tar.extractall(extract_root)  # specify which folder to extract to
-        if remove:
-            os.remove(tar_path)
 
     def __del__(self):
         shutil.rmtree(self.extracted_directory)
