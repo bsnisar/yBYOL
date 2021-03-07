@@ -49,8 +49,15 @@ def _extract_tarball(tar_path: str, extract_root: str, remove=False):
 
 class TarDataset(Dataset):
 
-    def __init__(self, tar_file, transformations=None, remove_tarballs=False):
-        self.extracted_directory = tempfile.mkdtemp()
+    def __init__(self, tar_file, transformations=None, remove_tarballs=False, dest_dir=None):
+        if dest_dir:
+            if os.path.exists(dest_dir):
+                raise ValueError(f"{dest_dir} directory exist")
+            os.makedirs(dest_dir)
+            self.extracted_directory = dest_dir
+        else:
+            self.extracted_directory = tempfile.mkdtemp()
+
         _extract_tarball(tar_file, self.extracted_directory, remove_tarballs)
         super().__init__(self.extracted_directory, transformations)
 
