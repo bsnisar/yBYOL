@@ -6,17 +6,15 @@
 #
 --index-url https://pypi.python.org/simple
 
-cached-property==1.5.2
-    # via h5py
-docutils>=0.10
+docutils==0.16
     # via -r requirements.in
-h5py==3.1.0
+h5py==2.10.0
     # via -r requirements.in
 joblib==1.0.1
     # via scikit-learn
 nmslib==2.1.1
     # via -r requirements.in
-numpy==1.20.1
+numpy==1.19.5
     # via
     #   -r requirements.in
     #   h5py
@@ -27,7 +25,7 @@ numpy==1.20.1
     #   scipy
     #   torch
     #   torchvision
-pandas==1.2.2
+pandas==1.1.5
     # via -r requirements.in
 pillow==8.1.0
     # via torchvision
@@ -48,7 +46,9 @@ scipy==1.6.1
     #   -r requirements.in
     #   scikit-learn
 six==1.15.0
-    # via python-dateutil
+    # via
+    #   h5py
+    #   python-dateutil
 threadpoolctl==2.1.0
     # via scikit-learn
 torch==1.7.1
