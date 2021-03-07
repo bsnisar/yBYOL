@@ -1,0 +1,10 @@
+h5py
+nmslib
+numpy
+pandas
+pytorch-metric-learning
+scipy
+torch
+torchvision
+
+docutils
