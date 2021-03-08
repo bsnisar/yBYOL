@@ -258,16 +258,17 @@ class BYOL:
 # noinspection PyPep8Naming
 class progressbar(object):
 
-    def __init__(self, steps, size=40, log_iter=80):
+    def __init__(self, steps, size=40, log_iter=40, metrics=False):
         self.bar_size = size
         self.steps = steps
         self.step = 0
+        self.metrics = metrics
         self._last = None
         self.log_iter = log_iter
+        self.print_next()
 
     def print_next(self, loss=None):
-        j = self.step + 1
-        self.step = j
+        j = self.step
         x = int(self.bar_size * j / self.steps)
         dur = None
         if self._last:
@@ -277,3 +278,6 @@ class progressbar(object):
         if j % self.log_iter == 0:
             logger.info("%i/%i [%s%s] - %s/s - loss=%s" % (j, self.steps, "#" * x, "." * (self.bar_size - x),
                                                            dur or "?", loss or "?"))
+            # print('{"metric": "Loss", "value": %s}' % loss)
+
+        self.step += 1
