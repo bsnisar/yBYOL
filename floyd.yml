@@ -1,6 +1,6 @@
 machine: gpu
 input:
-  - source: bsnisar/datasets/unsplash-light-open-ds/1
+  - source: bsnisar/datasets/unsplash-light-open-ds/2
     destination: input-ds
 env: pytorch-1.5
 description: BYOL v0.1

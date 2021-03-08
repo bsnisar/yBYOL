@@ -1,4 +1,2 @@
-torch
-torchvision
 pandas
 pytorch-metric-learning
