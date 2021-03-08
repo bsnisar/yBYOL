@@ -271,12 +271,12 @@ class progressbar(object):
         x = int(self.bar_size * j / self.steps)
         dur = None
         if self._last:
-            dur = self._last - datetime.now()
+            dur = datetime.now() - self._last
         self._last = datetime.now()
 
         if j % self.log_iter == 0:
-            logger.info("%i/%i [%s%s] - %s/s - loss=%s" % (j, self.steps, "#" * x, "." * (self.bar_size - x),
-                                                           dur or "?", loss or "?"))
-            # print('{"metric": "Loss", "value": %s}' % loss)
+            logger.info("[%s%s] %i/%i - %s/s - loss=%s" % ("#" * x, "." * (self.bar_size - x),
+                                                         j, self.steps,
+                                                         dur.total_seconds if dur else "?", loss or "?"))
 
         self.step += 1
