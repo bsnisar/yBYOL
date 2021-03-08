@@ -1,7 +1,7 @@
 import os
 import pandas
 import numpy as np
-from parastash import model as mds
+from parastash import models as mds
 
 from typing import Iterable
 from scipy.spatial import distance
@@ -13,23 +13,6 @@ def _file_basename2uid(path):
     """
     filename = os.path.basename(path)
     return filename[len('o_img-'):filename.rfind('-index.jpeg')]
-
-
-def labels_dataset_images(dataset_dir='', collections_dir=''):
-    df = pandas.read_csv(collections_dir)
-    ds = mds.FolderDataset(dataset_dir, None)
-    uid_list = [(_file_basename2uid(s), s) for s, _ in ds.samples]
-    uid_to_path = {uid[0]: uid[1] for idx, uid in enumerate(uid_list)}
-    uid_to_idx = {uid[0]: idx for idx, uid in enumerate(uid_list)}
-    is_in_dataset = df["uid"].isin(set(uid_to_idx.keys()))
-    collections_ = df[is_in_dataset].groupby('collection_id')['uid']
-
-    def _paths(col):
-        for uid in col: yield uid, uid_to_path[uid]
-
-    for col_id, col_uids in collections_:
-        col_uids_ = col_uids.unique()
-        yield col_id, col_uids_, _paths(col_uids_)
 
 
 def labeled_collections_precision_recall_at_k(embeddings, dataset, collections: pandas.DataFrame):

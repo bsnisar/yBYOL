@@ -26,7 +26,7 @@ matplotlib==3.3.4
     # via scikit-image
 networkx==2.5
     # via scikit-image
-nmslib==2.1.1
+nmslib==2.1.1F
     # via -r requirements.in
 numpy==1.19.5
     # via

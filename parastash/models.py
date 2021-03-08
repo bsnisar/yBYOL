@@ -132,7 +132,7 @@ class BYOL:
         self._current_net = self._online_network
         self._scaler = amp.GradScaler()
 
-    def train(self, loader: DataLoader, epochs, log_interval=80, return_embedding=False):
+    def train(self, loader: DataLoader, epochs, log_interval=40, return_embedding=False):
         step = 0
         total_steps = epochs * len(loader)
         pbar = progressbar(total_steps, log_iter=log_interval)
@@ -152,8 +152,7 @@ class BYOL:
                 with amp.autocast():
                     loss = self._loss(image_one, image_two)
 
-                if step % log_interval == 0:
-                    pbar.print_next(loss=loss.item())
+                pbar.print_next(loss=loss.item())
 
                 self._optimizer.zero_grad()
 
