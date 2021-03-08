@@ -5,7 +5,7 @@ pandas~=1.1.0
 imgaug<0.2.7
 pytorch-metric-learning
 scipy
-torch
-torchvision
+torch==1.5.0
+torchvision==0.6.0
 
 docutils

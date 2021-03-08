@@ -130,6 +130,7 @@ class BYOL:
         self._target_network = target_network
 
         self._current_net = self._online_network
+        self._scaler = amp.GradScaler()
 
     def train(self, loader: DataLoader, epochs, log_interval=80, return_embedding=False):
         step = 0
@@ -142,7 +143,7 @@ class BYOL:
             net.to(self.device)
             net.train()
 
-        scaler = amp.GradScaler()
+        scaler = self._scaler
         for epoch in range(epochs):
             for (left, right), _ in loader:
                 image_one = left.to(self.device)
@@ -223,6 +224,9 @@ class BYOL:
         target_state_dict = self._target_network.cpu().state_dict()
         predictor_state_dict = self._predictor.cpu().state_dict()
         return {
+            "optimizer": self._optimizer.state_dict(),
+            "scaller": self._scaler.state_dict(),
+            "epoch": 1,
             "online": online_state_dict,
             "target": target_state_dict,
             "predictor": predictor_state_dict,
@@ -254,7 +258,7 @@ class BYOL:
 # noinspection PyPep8Naming
 class progressbar(object):
 
-    def __init__(self, steps,  size=40, log_iter=80):
+    def __init__(self, steps, size=40, log_iter=80):
         self.bar_size = size
         self.steps = steps
         self.step = 0
