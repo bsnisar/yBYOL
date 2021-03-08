@@ -132,12 +132,11 @@ class BYOL:
         self._current_net = self._online_network
         self._scaler = amp.GradScaler()
 
-    def train(self, loader: DataLoader, epochs, log_interval=40, return_embedding=False):
+    def train(self, loader: DataLoader, epochs, log_interval=40):
         step = 0
         total_steps = epochs * len(loader)
         pbar = progressbar(total_steps, log_iter=log_interval)
-        logger.info(
-            f"prepare the loop: device={self.device}, batches={len(loader)}, epochs={epochs}, steps={total_steps}")
+        logger.info(f"device={self.device}, batches={len(loader)}, epochs={epochs}, steps={total_steps}")
 
         for net in (self._online_network, self._target_network, self._predictor):
             net.to(self.device)
