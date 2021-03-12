@@ -7,7 +7,7 @@ with open('requirements.txt') as f:
 setup(
     name='parastash',
     packages=find_packages(exclude=['prepare']),
-    version='0.0.6',
+    version='0.0.7',
     author='bsnisar',
     author_email='bogdan.sns@gmail.com',
     url='https://github.com/bsnisar/parastash',
