@@ -8,10 +8,14 @@
 
 cycler==0.10.0
     # via matplotlib
+dataclasses==0.6
+    # via torch
 decorator==4.4.2
     # via networkx
 docutils==0.16
     # via -r requirements.in
+future==0.18.2
+    # via torch
 h5py==2.10.0
     # via -r requirements.in
 imageio==2.9.0
@@ -43,7 +47,7 @@ numpy==1.19.5
     #   torchvision
 pandas==1.1.5
     # via -r requirements.in
-pillow==8.1.0
+pillow==8.1.2
     # via
     #   imageio
     #   matplotlib
@@ -77,11 +81,11 @@ six==1.15.0
     #   python-dateutil
 tifffile==2021.3.5
     # via scikit-image
-torch==1.8.0
+torch==1.7.0
     # via
     #   -r requirements.in
     #   torchvision
-torchvision==0.9.0
+torchvision==0.8.1
     # via -r requirements.in
 typing-extensions==3.7.4.3
     # via torch
