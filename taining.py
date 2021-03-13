@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 def cli(base_model, input_shape, output_dimension,
         freeze_base_network, train_dir, test_dir, metrics_df, batch_size, test_batch_size, epochs, save_model_dir):
 
-    net = models_hub.ExternalModel(name=base_model)
+    net = models_hub.ExternalModel(
+        name=base_model
+    )
 
     model = models.BYOL(
         external_net=net,
