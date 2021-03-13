@@ -1,9 +1,7 @@
 import copy
-import json
 import logging
 import os
-import sys
-import typing
+import json
 from datetime import datetime
 from datetime import timedelta
 
@@ -132,10 +130,10 @@ class BYOL:
         self._current_net = self._online_network
         self._scaler = amp.GradScaler()
 
-    def train(self, loader: DataLoader, epochs, log_interval=40):
+    def train(self, loader: DataLoader, epochs, log_interval=40, print_metrics=False):
         step = 0
         total_steps = epochs * len(loader)
-        pbar = progressbar(total_steps, log_iter=log_interval)
+        pbar = progressbar(total_steps, log_iter=log_interval, metrics=print_metrics)
         logger.info(f"device={self.device}, batches={len(loader)}, epochs={epochs}, steps={total_steps}")
 
         for net in (self._online_network, self._target_network, self._predictor):
@@ -277,5 +275,9 @@ class progressbar(object):
             logger.info("[%s%s] %i/%i - %s/s - loss=%s" % ("#" * x, "." * (self.bar_size - x),
                                                            j, self.steps,
                                                            dur.total_seconds() if dur else "?", loss or "?"))
+
+        if self.metrics:
+            m = {"metric": "loss", "value": loss, "step": j}
+            print(json.dumps(m))
 
         self.step += 1

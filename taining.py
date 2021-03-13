@@ -77,7 +77,7 @@ def cli(base_model, input_shape, output_dimension,
         test_embeddings, test_loader, pandas.read_csv(metrics_df)
     )
     for k,counts in stats.items():
-        logger.info(f"   [top-{k}] {counts}")
+        logger.info(f"   [top{k}] {counts}")
     logger.info("Saving model:")
     model.save(save_model_dir)
 
