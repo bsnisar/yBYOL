@@ -275,7 +275,7 @@ class progressbar(object):
 
         if j % self.log_iter == 0:
             logger.info("[%s%s] %i/%i - %s/s - loss=%s" % ("#" * x, "." * (self.bar_size - x),
-                                                         j, self.steps,
-                                                         dur.total_seconds if dur else "?", loss or "?"))
+                                                           j, self.steps,
+                                                           dur.total_seconds() if dur else "?", loss or "?"))
 
         self.step += 1
