@@ -64,21 +64,27 @@ def cli(base_model, input_shape, output_dimension,
     train_loader = train_dataset.create_loader(
         batch_size, shuffle=True, drop_last=True, num_workers=loader_workers
     )
-    model.train(epochs=epochs, loader=train_loader)
-    logger.info("Computing test embeddings")
+    model.train(
+        epochs=epochs,
+        loader=train_loader,
+        print_metrics=True
+    )
+
+    logger.info("Computing test embeddings and metrics:")
 
     test_loader = test_dataset.create_loader(
         batch_size=test_batch_size, shuffle=False, num_workers=loader_workers
     )
-
-    logger.info("Computing metrics:")
-    test_embeddings = model.predict_from_loader(test_loader)
+    test_embeddings = model.predict_from_loader(
+        test_loader
+    )
     stats = metrics.labeled_collections_precision_recall_at_k(
         test_embeddings, test_loader, pandas.read_csv(metrics_df)
     )
     for k,counts in stats.items():
-        logger.info(f"   [top{k}] {counts}")
-    logger.info("Saving model:")
+        logger.info(f"> [top{k}] {counts}")
+
+    logger.info("Persist model:")
     model.save(save_model_dir)
 
 

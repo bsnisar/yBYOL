@@ -206,7 +206,7 @@ class BYOL:
 
     def save(self, dir, suffix=None):
         logger.info(f"saving model and manifest to {dir}")
-        suffix = suffix or f"train_{datetime.isoformat(datetime.now())}"
+        suffix = suffix or f"run_{datetime.isoformat(datetime.now())}"
         meta_path = os.path.join(dir, f"model.{suffix}.json")
         with open(meta_path, "w") as f:
             json.dump(self.manifest, f, indent=4)
