@@ -134,7 +134,7 @@ class BYOL:
         step = 0
         total_steps = epochs * len(loader)
         pbar = progressbar(total_steps, log_iter=log_interval, metrics=print_metrics)
-        logger.info(f"device={self.device}, batches={len(loader)}, epochs={epochs}, steps={total_steps}")
+        logger.info("device=%s, batches=%s, epochs=%s, steps=%s", self.device, len(loader), epochs, total_steps)
 
         for net in (self._online_network, self._target_network, self._predictor):
             net.to(self.device)
@@ -195,6 +195,7 @@ class BYOL:
             #   target.data += (1 - tau) * (online - target)
             target.data = self.beta * target + (1 - self.beta) * online
 
+    # noinspection PyUnresolvedReferences
     @staticmethod
     def _loss_fn(x, y):
         x = nn.functional.normalize(x, dim=1)
@@ -205,13 +206,13 @@ class BYOL:
         pass
 
     def save(self, dir, suffix=None):
-        logger.info(f"saving model and manifest to {dir}")
-        suffix = suffix or f"run_{datetime.isoformat(datetime.now())}"
-        meta_path = os.path.join(dir, f"model.{suffix}.json")
+        logger.info("saving model and manifest to %s",dir)
+        suffix = suffix or "run_%s" % datetime.isoformat(datetime.now())
+        meta_path = os.path.join(dir, "model.%s.json" % suffix)
         with open(meta_path, "w") as f:
             json.dump(self.manifest, f, indent=4)
 
-        model_path = os.path.join(dir, f"model.{suffix}.pth")
+        model_path = os.path.join(dir, "model.%s.pth" % suffix)
         torch.save(self.state, model_path)
 
     @property

@@ -2,6 +2,6 @@ machine: gpu
 input:
   - source: bsnisar/datasets/unsplash-light-open-ds/2
     destination: input-data
-env: torch
+env: pytorch-1.5
 description: BYOL v0.1
-command: python taining.py --train_dir /input-data/train --test_dir /input-data/test --metrics_df /input-data/collections.csv
+command: python3 taining.py --train_dir /input-data/train --test_dir /input-data/test --metrics_df /input-data/collections.csv --epochs 4

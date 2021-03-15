@@ -46,7 +46,7 @@ class FolderDataset(Dataset):
 
 
 def _extract_tarball(tar_path: str, extract_root: str, remove=False):
-    logger.info(f"[TarDataset] extract {tar_path} into {tar_path}...")
+    logger.info("[tar] extract %s into %s...",tar_path,tar_path)
     with tarfile.open(tar_path) as my_tar:
         my_tar.extractall(extract_root)  # specify which folder to extract to
     if remove:
@@ -58,7 +58,7 @@ class TarDataset(Dataset):
     def __init__(self, tar_file, transformations=None, remove_tarballs=False, dest_dir=None):
         if dest_dir:
             if os.path.exists(dest_dir):
-                raise ValueError(f"{dest_dir} directory exist")
+                raise ValueError("%s directory exist" % dest_dir)
             os.makedirs(dest_dir)
             self.extracted_directory = dest_dir
         else:

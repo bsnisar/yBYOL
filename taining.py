@@ -20,6 +20,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+_dest_models_default = "%s/_models" % (os.environ['HOME'])
+
 @click.command()
 @click.option('--base_model', default='instagram', help='The Teacher model')
 @click.option('--input_shape', default=244, help='Model input shape side length')
@@ -31,7 +33,7 @@ logger = logging.getLogger(__name__)
 @click.option('--batch_size', default=64, help='input batch size for training.')
 @click.option('--test_batch_size', default=64, help='input batch size for testing.')
 @click.option('--epochs', default=10, help='number of epochs to train.')
-@click.option('--save_model_dir', default=f"{os.environ['HOME']}/_models", help='Output of the model.')
+@click.option('--save_model_dir', default=_dest_models_default, help='Output of the model.')
 def cli(base_model, input_shape, output_dimension,
         freeze_base_network, train_dir, test_dir, metrics_df, batch_size, test_batch_size, epochs, save_model_dir):
 
@@ -43,11 +45,12 @@ def cli(base_model, input_shape, output_dimension,
         external_net=net,
         input_shape=input_shape,
         output_dimension=output_dimension,
-        freeze_base_network=freeze_base_network,
+        freeze_base_network=True,
     )
 
-    logger.info(f"Initialize self-learning framework from '{base_model}' net: train_dir={train_dir},"
-                f" test_dir={test_dir} epochs={epochs} batch_size={batch_size} model_dir={save_model_dir}")
+    logger.info("Initialize self-learning framework from '%s' net: train_dir=%s "\
+                "test_dir=%s epochs=%s batch_size=%s model_dir=%s", base_model, train_dir, test_dir,
+                epochs, batch_size, save_model_dir)
 
     train_transformations = transforms.byol_augmentations()
     train_dataset = datasets.FolderDataset(
@@ -59,8 +62,8 @@ def cli(base_model, input_shape, output_dimension,
         test_dir, transformations=test_transformations
     )
 
-    logger.info(f"Loaded dataset of {len(train_dataset)} images")
-    logger.info(f"Loaded test dataset of {len(test_dataset)} images")
+    logger.info("Loaded dataset of %s images", len(train_dataset))
+    logger.info("Loaded test dataset of %s images", len(test_dataset))
     logger.info("Training model:")
     loader_workers = min(os.cpu_count() - 2, 0)
     train_loader = train_dataset.create_loader(
@@ -84,7 +87,7 @@ def cli(base_model, input_shape, output_dimension,
         test_embeddings, test_loader, pandas.read_csv(metrics_df)
     )
     for k,counts in stats.items():
-        logger.info(f"> [top{k}] {counts}")
+        logger.info("> [top{%s}] %s",k,counts)
 
     logger.info("Persist model:")
     model.save(save_model_dir)
