@@ -5,8 +5,7 @@ import os
 import pandas
 import os.path
 
-from parastash import datasets, models, models_hub
-from parastash import transforms
+from parastash import datasets, models, models_hub, transforms
 
 import metrics
 

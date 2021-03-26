@@ -78,9 +78,9 @@ def basic_augmentations(input_shape=224, mean=None, std=None):
     std = std or STD
 
     transformations = transforms.Compose(
+        [SquarePad()] + \
+        [transforms.Resize((input_shape, input_shape))] if input_shape else [] + \
         [
-            SquarePad(),
-            transforms.Resize((input_shape, input_shape)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]

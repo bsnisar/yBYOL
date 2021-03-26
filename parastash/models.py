@@ -100,7 +100,13 @@ class BYOL:
             hidden_units=mlp_hidden_size,
             out_features=output_dimension
         )
+
+        #
         # The first encoder
+        #
+        # The online network consists of an encoder f, a projector g and a predictor q — this can be seen as a
+        # backbone network(encoder f) with a fully connected layer(projection+prediction) on top. After training,
+        # only the encoder f is used for generating representations.
         online_network = nn.Sequential(self._net, projector)
 
         # The second encoder.
@@ -172,11 +178,13 @@ class BYOL:
         # a transformed version of the same batch. Each network generates a low-dimensional, latent
         #  representation
         # for their respective data.
+        #
+        # The loss function used is mean squared error — difference between l2 normalized online and target
+        # networks’ representations.
+        #
         online_proj_one = self._online_network(image_one)
         online_proj_two = self._online_network(image_two)
 
-        # Then, we attempt to predict the output of the target network using a multi-layer perceptron.
-        # BYOL maximizes the similarity between this prediction and the target network’s output.
         online_pred_one = self._predictor(online_proj_one)
         online_pred_two = self._predictor(online_proj_two)
 
@@ -190,9 +198,8 @@ class BYOL:
 
     def _update_target_network(self, step, total_steps):
         for online, target in zip(self._online_network.parameters(), self._target_network.parameters()):
-            # for p, pt in
-            #   pt.data = self.beta * pt.data + (1 - self.beta) * p.data
-            #   target.data += (1 - tau) * (online - target)
+            # After each training, the following update is made:
+            #
             target.data = self.beta * target + (1 - self.beta) * online
 
     # noinspection PyUnresolvedReferences
@@ -202,11 +209,18 @@ class BYOL:
         y = nn.functional.normalize(y, dim=1)
         return 2 - 2 * (x * y).sum(dim=-1)
 
-    def load(self):
-        pass
+    def load(self, path):
+        self._load_state_dict(path)
+
+    def _load_state_dict(self, state_dict_path):
+        logger.info(f"Loading state dict from %s", state_dict_path)
+        state_dicts = torch.load(state_dict_path)
+        self._online_network.load_state_dict(state_dicts["online"])
+        self._target_network.load_state_dict(state_dicts["target"])
+        self._predictor.load_state_dict(state_dicts["predictor"])
 
     def save(self, dir, suffix=None):
-        logger.info("saving model and manifest to %s",dir)
+        logger.info("saving model and manifest to %s", dir)
         suffix = suffix or "run_%s" % datetime.isoformat(datetime.now())
         meta_path = os.path.join(dir, "model.%s.json" % suffix)
         with open(meta_path, "w") as f:
@@ -221,9 +235,6 @@ class BYOL:
         target_state_dict = self._target_network.cpu().state_dict()
         predictor_state_dict = self._predictor.cpu().state_dict()
         return {
-            "optimizer": self._optimizer.state_dict(),
-            "scaller": self._scaler.state_dict(),
-            "epoch": 1,
             "online": online_state_dict,
             "target": target_state_dict,
             "predictor": predictor_state_dict,
@@ -253,6 +264,23 @@ class BYOL:
 
 
 # noinspection PyPep8Naming
+def _diff_time(dur):
+    diff = dur.total_seconds()
+    d = int(diff / 86400)
+    h = int((diff - (d * 86400)) / 3600)
+    m = int((diff - (d * 86400 + h * 3600)) / 60)
+    s = int((diff - (d * 86400 + h * 3600 + m * 60)))
+    if d > 0:
+        fdiff = f'{d}d{h}h{m}m{s}s'
+    elif h > 0:
+        fdiff = f'{h}h{m}m{s}s'
+    elif m > 0:
+        fdiff = f'{m}m{s}s'
+    else:
+        fdiff = f'{s}s'
+    return fdiff
+
+
 class progressbar(object):
 
     def __init__(self, steps, size=40, log_iter=40, metrics=False):
@@ -260,23 +288,25 @@ class progressbar(object):
         self.steps = steps
         self.step = 0
         self.metrics = metrics
-        self._last = None
+        self._prev_call_ts = None
         self.log_iter = log_iter
         self.print_next()
 
     def print_next(self, loss=None):
         j = self.step
         x = int(self.bar_size * j / self.steps)
-        dur = None
-        if self._last:
-            dur = datetime.now() - self._last
-        self._last = datetime.now()
+        remain = '?'
+        if self._prev_call_ts:
+            one_step_dur = datetime.now() - self._prev_call_ts
+            remain_total = one_step_dur * (self.steps - j)
+            remain = _diff_time(remain_total)
+
+        self._prev_call_ts = datetime.now()
 
         if j % self.log_iter == 0:
-            logger.info("[%s%s] %i/%i - %s/s - loss=%s" % ("#" * x, "." * (self.bar_size - x),
-                                                           j, self.steps,
-                                                           dur.total_seconds() if dur else "?", loss or "?"))
-
+            logger.info("[%s%s] %i/%i - %s - loss=%s" % ("#" * x, "." * (self.bar_size - x),
+                                                         j, self.steps,
+                                                         remain, loss or "?"))
         if self.metrics:
             m = {"metric": "loss", "value": loss, "step": j}
             print(json.dumps(m))

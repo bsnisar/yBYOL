@@ -25,13 +25,9 @@ class Dataset(ImageFolder):
         )
 
     def create_loader(self, batch_size, shuffle,
-                      drop_last=False, num_workers=0, pin_memory=True, split_len: int = None) -> DataLoader:
-        this_dataset = self
-        if split_len:
-            this_dataset = torch.utils.data.random_split(self, [split_len, len(self) - split_len])[0]
-
+                      drop_last=False, num_workers=0, pin_memory=True) -> DataLoader:
         return DataLoader(
-            this_dataset,
+            self,
             batch_size=batch_size,
             shuffle=shuffle,
             drop_last=drop_last,
