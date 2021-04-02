@@ -3,13 +3,14 @@ import sys
 import random
 import tqdm
 
-import parastash.model.transforms as T
+from parastash import transforms as T
 from multiprocessing import Pool
 
 import PIL.Image
 
 PIL.Image.MAX_IMAGE_PIXELS = None
 
+HOME = os.environ['HOME']
 
 def is_jpeg(file):
     _, file_extension = os.path.splitext(file)
@@ -17,8 +18,8 @@ def is_jpeg(file):
 
 
 AUG = T.resize_augmentations()
-SRC_DIR = '/Users/bohdans/.stash/caches'
-DEST_DIR = '/Users/bohdans/.stash/dataset_002'
+SRC_DIR = f'{HOME}/.stash/caches'
+DEST_DIR = f'{HOME}/.stash/dataset_002'
 
 TRAIN_DIR = f"{DEST_DIR}/train/class_001"
 TEST_DIR = f"{DEST_DIR}/test/class_001"
