@@ -10,6 +10,7 @@ net from unlabeled data based on pretrained models.
 
 Inspired by https://github.com/lucidrains/byol-pytorch
 
+![byol](prepare/diagram.png?raw=true)
 
 ### Install
 
