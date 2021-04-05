@@ -22,6 +22,21 @@ _MODELS = {
 }
 
 
+class InternalModel:
+
+    def __init__(self, zip_path) -> None:
+        super().__init__()
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = torch.load(zip_path)
+        model.to(self._device)
+        model.eval()
+        self._model = model
+
+    def predict(self, input):
+        with torch.no_grad():
+            return self._model(input.to(self._device)).cpu().numpy()
+
+
 class ExternalModel:
 
     def __init__(self, name) -> None:

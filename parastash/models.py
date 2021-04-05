@@ -229,6 +229,9 @@ class BYOL:
         model_path = os.path.join(dir, "model.%s.pth" % suffix)
         torch.save(self.state, model_path)
 
+        model_path_full = os.path.join(dir, "model.%s.full.zip" % suffix)
+        torch.save(self._current_net, model_path_full)
+
     @property
     def state(self):
         online_state_dict = self._online_network.cpu().state_dict()
@@ -251,6 +254,10 @@ class BYOL:
             "learning_rate": self.learning_rate,
             "beta": self.beta
         }
+
+    def predict(self, input):
+        with torch.no_grad():
+            return self._current_net(input.to(self.device)).cpu().numpy()
 
     def predict_from_loader(self, loader: DataLoader):
         self._current_net.to(self.device)
