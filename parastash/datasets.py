@@ -44,7 +44,26 @@ class FolderDataset(Dataset):
 def _extract_tarball(tar_path: str, extract_root: str, remove=False):
     logger.info("[tar] extract %s into %s...",tar_path,tar_path)
     with tarfile.open(tar_path) as my_tar:
-        my_tar.extractall(extract_root)  # specify which folder to extract to
+        def is_within_directory(directory, target):
+            
+            abs_directory = os.path.abspath(directory)
+            abs_target = os.path.abspath(target)
+        
+            prefix = os.path.commonprefix([abs_directory, abs_target])
+            
+            return prefix == abs_directory
+        
+        def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+        
+            for member in tar.getmembers():
+                member_path = os.path.join(path, member.name)
+                if not is_within_directory(path, member_path):
+                    raise Exception("Attempted Path Traversal in Tar File")
+        
+            tar.extractall(path, members, numeric_owner=numeric_owner) 
+            
+        
+        safe_extract(my_tar, extract_root)
     if remove:
         os.remove(tar_path)
 
